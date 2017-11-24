@@ -12,18 +12,20 @@ Express uses http for us, but we need to configure http to use socketIO
 const publicPath = path.join(__dirname, '../public');
 
 //process.env stores all of our environment variables
-//heroku uses this will change the port based on on the PORT env variable
+//heroku uses this & this line will change the port based on on the PORT env variable
 const port = process.env.PORT || 3000; //if PORT doesn't exist, default to port 3000
+
 //create new express app
 var app = express();
 //pass in the express app to http create since since it has all we need for http.createServer
 var server = http.createServer(app);
-var io = socketIO(server); //websocket server to commuicate between client and server
+//tell websocket server to commuicate between client and server
+var io = socketIO(server);
 
-/configure middleware to set up the directory for all our public files
+//configure middleware to set up the directory for all our public files
 app.use(express.static(publicPath));
 
-//register an event listener
+//io.on() registers an event listener
 //listen for a new connection
 io.on('connection', (socket) => {
   console.log('New user connected');
