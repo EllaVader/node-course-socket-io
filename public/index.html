@@ -9,12 +9,13 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    //use the methods available to us in socket.io.js
     var socket = io();
-
+    //listen for connect events from the server
     socket.on('connect', () => {
       console.log('Connected to server');
     });
-
+    //listen for disconnect events from the server
     socket.on('disconnect', () => {
       console.log('Disconnected from server')
     });
