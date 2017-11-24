@@ -29,6 +29,22 @@ app.use(express.static(publicPath));
 //listen for a new connection
 io.on('connection', (socket) => {
   console.log('New user connected');
+
+  //socket.emit triggers our custom event, 2nd arg is anything we want. Typcially it is
+  //an object
+  socket.emit('newMessage', {
+    from: 'janine',
+    text: 'Hey. What is going on.',
+    createdAt: 123
+  });
+
+  //listen for an event that the client has created.
+  //call back will contain the contents of this new message object
+  socket.on('createMessage', (message) => {
+    console.log('createMessage', message);
+  })
+
+
   //listen for a closed connection on the socket connection (i.e browser closes)
   socket.on('disconnect', () => {
     console.log('User was disconnected');
