@@ -30,18 +30,19 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('New user connected');
 
-  //socket.emit triggers our custom event, 2nd arg is anything we want. Typcially it is
-  //an object
-  socket.emit('newMessage', {
-    from: 'janine',
-    text: 'Hey. What is going on.',
-    createdAt: 123
-  });
+  //socket.emit triggers our custom event to the individual socket (connection),
+  //2nd arg is anything we want. Typcially it is an object
 
   //listen for an event that the client has created.
   //call back will contain the contents of this new message object
   socket.on('createMessage', (message) => {
     console.log('createMessage', message);
+    //when we receive a message, broadcast it out to all of our connections using io.emit
+    io.emit('newMessage', {
+      from: message.from,
+      text: message.text,
+      createdAt: new Date().getTime()
+    });
   })
 
 

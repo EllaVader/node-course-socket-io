@@ -6,12 +6,6 @@ var socket = io();
 //register for the "connect" event
 socket.on('connect', function() {
   console.log('Connected to server');
-
-  //simulate triggering an event.
-  socket.emit('createMessage', {
-    from: 'mike',
-    text: 'Hey this is from Mike'
-  });
 });
 
 //listen for the disconnect event from the server
