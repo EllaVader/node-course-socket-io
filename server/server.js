@@ -43,10 +43,12 @@ io.on('connection', (socket) => {
 
   //listen for an event that the client has created.
   //call back will contain the contents of this new message object
-  socket.on('createMessage', (message) => {
+  socket.on('createMessage', (message, callback) => {
     console.log('createMessage', message);
     //when we receive a message, send it out to all of our connections using io.emit
     io.emit('newMessage', generateMessage(message.from, message.text));
+    //now make a call to the callback (the client's callback)
+    callback('This is from the server');
   })
 
   //listen for a closed connection on the socket connection (i.e browser closes)
