@@ -18,20 +18,21 @@ socket.on('disconnect', function() {
 //listen for our custom event from server.js - we received a message
 //the 2nd arg is the call back that is the data that our sever sends to us.
 socket.on('newMessage', function(message) {
-  console.log('newMessage', message);
+  var formattedTime = moment(message.createdAt).format('h:mm a');
   //create a new element to add to the dom
   var li = jQuery('<li></li>');
-  li.text(`${message.from}: ${message.text}`);
+  li.text(`${message.from} ${formattedTime}: ${message.text}`);
   jQuery('#messages').append(li);
 });
 
 //listen for the generateLocationMessage event that will get emitted by the server when the user clicks on the locate me locationButton
 socket.on('newLocationMessage', function(message) {
+  var formattedTime = moment(message.createdAt).format('h:mm a');
   var li = jQuery('<li></li>');
   //open the link in a new tab by using target="_blank"
   var a = jQuery('<a target="_blank">My current location</a>')
 
-  li.text(`${message.from}: `);
+  li.text(`${message.from} ${formattedTime}: `);
   //set the href attribute on the a tag. (if you pass in on arg, it will return the attribute)
   a.attr('href', message.url);
   li.append(a); //add this url to our li target
