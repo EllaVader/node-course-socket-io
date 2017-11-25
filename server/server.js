@@ -4,7 +4,7 @@ const path = require('path'); //built in module
 const socketIO = require('socket.io');
 const express = require('express');
 
-const {generateMessage} = require('./utils/message');
+const {generateMessage, generateLocationMessage} = require('./utils/message');
 
 /*
 To use socketIO, we have to use http directly rather than express.
@@ -50,6 +50,11 @@ io.on('connection', (socket) => {
     //now make a call to the callback (the client's callback)
     callback('This is from the server');
   })
+
+  //listen for a new event from the client called createLocationMessage
+  socket.on('createLocationMessage', (coords) => {
+    io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
+  });
 
   //listen for a closed connection on the socket connection (i.e browser closes)
   socket.on('disconnect', () => {
