@@ -3,6 +3,9 @@ const path = require('path'); //built in module
 
 const socketIO = require('socket.io');
 const express = require('express');
+
+const {generateMessage} = require('./utils/message');
+
 /*
 To use socketIO, we have to use http directly rather than express.
 Express uses http for us, but we need to configure http to use socketIO
@@ -32,30 +35,18 @@ io.on('connection', (socket) => {
 
   //socket.emit triggers our custom event to the individual socket (connection),
   //2nd arg is anything we want. Typcially it is an object
-  socket.emit('newMessage', {
-    from: 'Admin',
-    text: 'Welcome to the chat app',
-    createdAt: new Date().getTime()
-  });
+  socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
 
   //socket.broadcast.emit will broadcast message to everyone but the individual socket
   //that made the connection
-  socket.broadcast.emit('newMessage', {
-    from: 'Admin',
-    text: 'New user joined',
-    createdAt: new Date().getTime()
-  });
+  socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined'));
 
   //listen for an event that the client has created.
   //call back will contain the contents of this new message object
   socket.on('createMessage', (message) => {
     console.log('createMessage', message);
     //when we receive a message, send it out to all of our connections using io.emit
-    io.emit('newMessage', {
-      from: message.from,
-      text: message.text,
-      createdAt: new Date().getTime()
-    });
+    io.emit('newMessage', generateMessage(message.from, message.text));
   })
 
   //listen for a closed connection on the socket connection (i.e browser closes)
