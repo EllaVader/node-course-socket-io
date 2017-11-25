@@ -48,7 +48,7 @@ io.on('connection', (socket) => {
     //when we receive a message, send it out to all of our connections using io.emit
     io.emit('newMessage', generateMessage(message.from, message.text));
     //now make a call to the callback (the client's callback)
-    callback('This is from the server');
+    callback();
   })
 
   //listen for a new event from the client called createLocationMessage

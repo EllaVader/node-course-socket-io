@@ -1,3 +1,5 @@
+//note: the styles.css was taken from links.mead.io/chat-css
+
 //use the methods available to us in socket.io.js
 //make a request from client to open up a web socket and keep it open
 var socket = io();
@@ -42,12 +44,16 @@ jQuery('#message-form').on('submit', function(e) {
   //override the default behavior on a form submit, which puts the submission in the URL
   //and refreshes the page - bad
   e.preventDefault();
+
+  var messageTextbox = jQuery('[name=message]');
+
   //send the createMessage Event that the server is listening for.  The server will handle it now.
   socket.emit('createMessage', {
     from: 'User',
-    text: jQuery('[name=message]').val()
+    text: messageTextbox.val()
   }, function(){
-
+    //clear the message after it is sent
+    messageTextbox.val('');
   });
 });
 
@@ -58,14 +64,18 @@ locationButton.on('click', function(){
   if(!navigator.geolocation){
     return alert('Geolocation not supported by your browser.');
   }
+  //after they click the button, make it disabled until it is done.
+  locationButton.attr('disabled', 'disabled').text('Sending location...');
   //built in geolocator that we can use to get our position in the world
   //takes 2 args, success function and failure function.
   navigator.geolocation.getCurrentPosition(function(position){
+    locationButton.removeAttr('disabled').text('Send location');
     socket.emit('createLocationMessage', {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude
     });
   },function(){
+    locationButton.removeAttr('disabled').text('Send location');
     alert('Unable to fetch location.');
   });
 });
