@@ -18,26 +18,32 @@ socket.on('disconnect', function() {
 //listen for our custom event from server.js - we received a message
 //the 2nd arg is the call back that is the data that our sever sends to us.
 socket.on('newMessage', function(message) {
+  //use moment library for nice time formatting
   var formattedTime = moment(message.createdAt).format('h:mm a');
-  //create a new element to add to the dom
-  var li = jQuery('<li></li>');
-  li.text(`${message.from} ${formattedTime}: ${message.text}`);
-  jQuery('#messages').append(li);
+  var template = jQuery('#message-template').html();
+  //use mustache to template out the formatting of our content.  It's defined in index.html
+  var html = Mustache.render(template, {
+    text: message.text,
+    from: message.from,
+    createdAt: formattedTime
+  });
+  jQuery('#messages').append(html);
 });
 
-//listen for the generateLocationMessage event that will get emitted by the server when the user clicks on the locate me locationButton
+//listen for the generateLocationMessage event that will get emitted by the
+//server when the user clicks on the locate me locationButton
 socket.on('newLocationMessage', function(message) {
+  //use moment library for nice time formatting
   var formattedTime = moment(message.createdAt).format('h:mm a');
-  var li = jQuery('<li></li>');
-  //open the link in a new tab by using target="_blank"
-  var a = jQuery('<a target="_blank">My current location</a>')
-
-  li.text(`${message.from} ${formattedTime}: `);
-  //set the href attribute on the a tag. (if you pass in on arg, it will return the attribute)
-  a.attr('href', message.url);
-  li.append(a); //add this url to our li target
+  var template = jQuery('#location-message-template').html();
+  //use mustache to template out the content.  It's defined in index.html
+  var html = Mustache.render(template, {
+    createdAt: formattedTime,
+    from: message.from,
+    url: message.url
+  });
   //now display it on the dom
-  jQuery('#messages').append(li);
+  jQuery('#messages').append(html);
 });
 
 //listen for submit event, has a callback
