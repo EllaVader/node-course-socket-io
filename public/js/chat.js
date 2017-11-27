@@ -25,12 +25,32 @@ function scrollToBottom() {
 //listen for connect events from the server
 //register for the "connect" event
 socket.on('connect', function() {
-  console.log('Connected to server');
+  //now join a room
+  var params = jQuery.deparam(window.location.search);
+  socket.emit('join', params, function(err) {
+    if(err){
+      //display an alert
+      alert(err);
+      //redirect to login page
+      window.location.href = '/';
+    } else {
+      console.log('No error');
+    }
+  });
 });
 
 //listen for the disconnect event from the server
 socket.on('disconnect', function() {
   console.log('Disconnected from server')
+});
+
+//listen for a new user joining the room from the server
+socket.on('updateUserList', function(users) {
+  var ol = jQuery('<ol></ol>');
+  users.forEach(function(user) {
+    ol.append(jQuery('<li></li>').text(user));
+  });
+  jQuery('#users').html(ol);
 });
 
 //listen for our custom event from server.js - we received a message

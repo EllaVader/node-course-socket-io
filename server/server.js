@@ -5,6 +5,8 @@ const socketIO = require('socket.io');
 const express = require('express');
 
 const {generateMessage, generateLocationMessage} = require('./utils/message');
+const {isRealString} = require('./utils/validation');
+const {Users} = require('./utils/users');
 
 /*
 To use socketIO, we have to use http directly rather than express.
@@ -24,6 +26,7 @@ var app = express();
 var server = http.createServer(app);
 //tell websocket server to commuicate between client and server
 var io = socketIO(server);
+var users = new Users();
 
 //configure middleware to set up the directory for all our public files
 app.use(express.static(publicPath));
@@ -33,13 +36,37 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('New user connected');
 
-  //socket.emit triggers our custom event to the individual socket (connection),
-  //2nd arg is anything we want. Typcially it is an object
-  socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
 
-  //socket.broadcast.emit will broadcast message to everyone but the individual socket
-  //that made the connection
-  socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined'));
+
+  //1st arg is the event we are registered to, 2nd arg contains callback, which has the contents of the
+  //event, and also it has a callback that we need to call when we are done working with the params
+  socket.on('join', (params, callback) => {
+
+    //validate the data that come through (name and room)- make sure they are valued not empty string
+    if(!isRealString(params.name) || !isRealString(params.room)){
+      return callback('Name and room name are required');
+    }
+
+    //now "join" this specific room (socket)
+    socket.join(params.room);
+    users.removeUser(socket.id);
+    users.addUser(socket.id, params.name, params.room);
+    //broadcast to the specific room that a new user has joined
+    io.to(params.room).emit('updateUserList', users.getUserList(params.room));
+
+    //socket.leave(params.room); //leave a room (socket)
+
+    //socket.emit triggers our custom event to the individual socket (connection),
+    //2nd arg is anything we want. Typcially it is an object
+    socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
+
+    //socket.broadcast.emit will broadcast message to everyone but the individual socket
+    //that made the connection
+    //socket.broadcast.to('room').emit will broadcast to everyone in that specific room
+    socket.broadcast.to(params.room).emit('newMessage', generateMessage('Admin', `${params.name} has joined`));
+
+    callback();
+  });
 
   //listen for an event that the client has created.
   //call back will contain the contents of this new message object
@@ -58,7 +85,13 @@ io.on('connection', (socket) => {
 
   //listen for a closed connection on the socket connection (i.e browser closes)
   socket.on('disconnect', () => {
-    console.log('User was disconnected');
+    var user = users.removeUser(socket.id);
+    if(user){
+      //update the user list on the page
+      io.to(user.room).emit('updateUserList', users.getUserList(user.room));
+      //broadcast that a user just left the chatroom
+      io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left.`));
+    }
   });
 });
 
