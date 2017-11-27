@@ -71,16 +71,22 @@ io.on('connection', (socket) => {
   //listen for an event that the client has created.
   //call back will contain the contents of this new message object
   socket.on('createMessage', (message, callback) => {
-    console.log('createMessage', message);
-    //when we receive a message, send it out to all of our connections using io.emit
-    io.emit('newMessage', generateMessage(message.from, message.text));
+    var user = users.getUser(socket.id);
+    if(user && isRealString(message.text)){
+      //when we receive a message, send it out just the room that this user belongs
+      io.to(user.room).emit('newMessage', generateMessage(user.name, message.text));
+    }
     //now make a call to the callback (the client's callback)
     callback();
   })
 
   //listen for a new event from the client called createLocationMessage
   socket.on('createLocationMessage', (coords) => {
-    io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
+    var user = users.getUser(socket.id);
+    if(user){
+      //when we receive a message, send it out just the room that this user belongs
+      io.to(user.room).emit('newLocationMessage', generateLocationMessage(user.name, coords.latitude, coords.longitude));
+    }
   });
 
   //listen for a closed connection on the socket connection (i.e browser closes)

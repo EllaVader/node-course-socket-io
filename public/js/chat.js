@@ -96,7 +96,6 @@ jQuery('#message-form').on('submit', function(e) {
 
   //send the createMessage Event that the server is listening for.  The server will handle it now.
   socket.emit('createMessage', {
-    from: 'User',
     text: messageTextbox.val()
   }, function(){
     //clear the message after it is sent
