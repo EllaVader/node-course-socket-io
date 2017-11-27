@@ -4,6 +4,24 @@
 //make a request from client to open up a web socket and keep it open
 var socket = io();
 
+//autoscrolling when we add a new message to the chat area if we are the bottom of the page
+function scrollToBottom() {
+  //selectors
+  var messages = jQuery('#messages');
+  var newMessage = messages.children('li:last-child');
+
+  //heights
+  var clientHeight = messages.prop('clientHeight');
+  var scrollTop = messages.prop('scrollTop');
+  var scrollHeight = messages.prop('scrollHeight');
+  var newMessageHeight = newMessage.innerHeight();
+  var lastMessageHeight = newMessage.prev().innerHeight();
+
+  if(clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight){
+    messages.scrollTop(scrollHeight);
+  }
+}
+
 //listen for connect events from the server
 //register for the "connect" event
 socket.on('connect', function() {
@@ -28,6 +46,7 @@ socket.on('newMessage', function(message) {
     createdAt: formattedTime
   });
   jQuery('#messages').append(html);
+  scrollToBottom();
 });
 
 //listen for the generateLocationMessage event that will get emitted by the
@@ -44,6 +63,7 @@ socket.on('newLocationMessage', function(message) {
   });
   //now display it on the dom
   jQuery('#messages').append(html);
+  scrollToBottom();
 });
 
 //listen for submit event, has a callback
