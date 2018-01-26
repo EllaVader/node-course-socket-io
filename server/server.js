@@ -11,6 +11,7 @@ const {Users} = require('./utils/users');
 /*
 To use socketIO, we have to use http directly rather than express.
 Express uses http for us, but we need to configure http to use socketIO
+MOd
 */
 
 //path.join is a cleaner way to deal with moving around folders within your app
